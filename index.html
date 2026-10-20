@@ -9,14 +9,14 @@
 <nav class="tabs"><button id="todayTab" class="active" onclick="showPage('today')">今日计划</button><button id="weekTab" onclick="showPage('week')">每周成长卡</button></nav>
 <section id="today"><div class="card"><div class="row"><h2 class="grow">今天，我想完成这些事</h2><b id="count"></b></div><div class="progress"><div id="bar"></div></div><div id="encourage" class="muted"></div></div><div class="card"><h2>🎒 今天选哪些事项？</h2><p class="muted small">点选事项，再选时间，加入今天的计划。</p><div id="quickTasks" class="row"></div></div><div id="tasks"></div><button class="quiet" onclick="openAdd()">＋ 添加一个目标</button><div class="card surprise-card" id="surpriseCard"><div class="surprise-title"><h2>🎁 连续打卡惊喜</h2><span id="streakBadge" class="muted"></span></div><p id="surpriseMessage" class="muted">连续完成任务，可能会有神秘奖励掉落！</p><div id="surpriseReward" class="surprise-reward hidden"></div><div id="confetti" class="confetti hidden">🎉 ✨ 🎊 🌟 🎈</div><details id="surpriseDetails" class="hidden"><summary>看看已经收集的奖励</summary><ol id="surpriseHistory" class="surprise-history"></ol></details></div><div class="card garden-card"><div class="row"><h2 class="grow">🏡 我的成长花园</h2><b id="gardenLevel"></b></div><p class="muted">从一片空地开始，把每天的小努力，变成花园里的风景。</p><div id="rewardNote" class="reward-note" role="status" aria-live="polite">今天也可以为花园添一点美好。</div><div id="gardenScene"></div><div id="gardenSummary" class="garden-summary"></div><b id="gardenNext"></b><div class="progress"><div id="gardenProgress"></div></div><details><summary>花园怎么长大？</summary><p class="muted milestones">每天每种事项第一次完成，长出一朵花（每天最多7朵）。<br>完成当天全部目标，种下一棵树，并获得1天建房进度。<br>累计1天：小屋地基 · 3天：温暖小屋 · 7天：漂亮屋顶<br>14天：花窗与围栏 · 30天：梦幻庭院<br>不用连续打卡，休息不会扣奖励。花园按当前完成记录计算；撤销完成、移除目标后会相应更新。重复添加同名事项不会多得花。景观最多展示24朵花、12棵树，总数持续累计。</p></details></div></section>
 <section id="week" class="hidden"><div class="row"><button onclick="changeWeek(-1)">← 上一周</button><h2 id="weekTitle" class="grow center"></h2><button id="nextWeek" onclick="changeWeek(1)">下一周 →</button></div><div class="card"><div class="stats" id="stats"></div><div class="weekdays" id="days"></div><h2>📚 我做了哪些事</h2><div id="subjects"></div><h2>💡 我的小发现</h2><p id="insight"></p></div><div class="card"><h2>💬 我想说一句</h2><label for="mood">这一周的心情</label><select id="mood" onchange="saveReflection()"><option value="">选一个心情</option><option>😊 很开心</option><option>🙂 还不错</option><option>😌 有点累</option><option>💪 想再试试</option></select><label for="reflection">这周我最满意的是 / 下周我想试试</label><input id="reflection" maxlength="300" placeholder="可以请家人帮忙写下来" oninput="saveReflection()"><span class="muted small">填写后自动保存</span></div></section>
-<footer class="muted small">记录保存在当前设备的当前浏览器中。请定期在家长设置里导出备份。</footer>
+<footer class="muted small">记录保存在当前设备的当前浏览器中。请定期在家长设置里导出备份。<p id="analyticsNotice" hidden></p></footer>
 </main>
 <dialog id="addDialog"><h2>✨ 添加一个小目标</h2><div id="presets" class="row"></div><form id="addForm"><label for="taskName">目标名称</label><input id="taskName" required maxlength="40" placeholder="例如：阅读一本喜欢的书"><label for="duration">计划几分钟</label><select id="duration"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><div class="row"><button class="primary" type="submit">加入今天的计划</button><button type="button" onclick="closeDialog('addDialog')">取消</button></div></form></dialog>
 <dialog id="timerDialog"><h2 id="timerTitle" class="center"></h2><p class="center muted">专心做一件事，就很棒</p><div id="clock" class="clock"></div><p id="timerHint" class="center muted"></p><div class="row"><button id="pause" onclick="togglePause()">暂停</button><button onclick="extendTimer()">再加5分钟</button><button class="primary" onclick="finishTimer()">✓ 完成啦</button><button onclick="stopForToday()">今天先到这里</button></div><p class="small muted">提前完成也可以打勾；关闭计时后可重新开始。</p><button class="quiet" onclick="closeDialog('timerDialog')">返回计划（继续计时）</button></dialog>
 <dialog id="settings"><h2>家长设置与备份</h2><p>孩子每天从空白计划开始，自主选择目标。听写请由家人协助。</p><h3>常用目标</h3><p class="small muted">每行一个，最多12项；只影响添加目标的快捷按钮。</p><textarea id="presetEdit" rows="6" style="width:100%;font:inherit;padding:12px;border-radius:12px;border:1px solid #c6d4c5"></textarea><div class="row" style="margin-top:15px"><button class="primary" onclick="savePresets()">保存常用目标</button><button onclick="exportData()">导出备份</button><button onclick="document.getElementById('importFile').click()">恢复备份</button><input id="importFile" class="hidden" type="file" accept="application/json,.json" onchange="importData(event)"><button onclick="closeDialog('settings')">关闭</button></div><p id="settingsMessage" class="small muted"></p><p class="small muted">恢复前请先导出当前记录；恢复会替换此设备上的全部记录。换网址、清除网站数据或换浏览器后，需要用备份恢复。</p></dialog>
 <script>
 'use strict';
-const KEY='little-plan-v1';const rewardPool=[['🧸','向父母兑换一件200元以内的玩具（要先讲清楚为什么想要）'],['🥾','和家人户外徒步一次，路线由小小探险家决定'],['🧹','附赠儿童房大扫除一回，家人负责陪伴和拍照取证'],['🍦','获得一次冰淇淋或喜欢的小点心，快乐但不打翻'],['🎬','家庭电影之夜一次，片名由你和家人一起选'],['🛝','去公园玩一次，家长只负责安全，不负责催回家'],['📚','挑一本喜欢的课外书，成为本周的“选书大臣”'],['🛌','周末获得一次“晚睡10分钟”小特权（仅限家长同意）'],['🎨','安排一次亲子手工，作品可以骄傲地挂起来'],['🍳','和家人一起做一道想吃的菜，主厨帽可选戴可不戴']];const defaults=['语文生字听写','英语单词听写','错题整理','语文作业','数学作业','英语朗读','语文阅读'];const $=id=>document.getElementById(id);let db={version:1,days:{},reflections:{},presets:defaults,surprises:{nextAt:randomTarget(),rewards:[]}},storageOK=true;
+const KEY='little-plan-v1';const rewardPool=[['🧸','向父母兑换一件200元以内的玩具（要先讲清楚为什么想要）'],['🥾','和家人户外徒步一次，路线由小小探险家决定'],['🧹','附赠儿童房大扫除一回，家人负责陪伴和拍照取证'],['🍦','获得一次冰淇淋或喜欢的小点心，快乐但不打翻'],['🎬','家庭电影之夜一次，片名由你和家人一起选'],['🛝','去公园玩一次，家长只负责安全，不负责催回家'],['📚','挑一本喜欢的课外书，成为本周的“选书大臣”'],['🛌','周末获得一次“晚睡10分钟”小特权（仅限家长同意）'],['🎨','安排一次亲子手工，作品可以骄傲地挂起来'],['🍳','和家人一起做一道想吃的菜，主厨帽可选戴可不戴']];const defaults=['语文生字听写','英语单词听写','错题整理','语文作业（含高思）','数学作业（含高思）','英语朗读','语文阅读'];const $=id=>document.getElementById(id);let db={version:1,days:{},reflections:{},presets:defaults,surprises:{nextAt:randomTarget(),rewards:[]}},storageOK=true;
 try{const raw=localStorage.getItem(KEY);if(raw){const value=JSON.parse(raw);if(!valid(value))throw Error('invalid');db=value}}catch(e){storageOK=false;alert('无法读取原有记录或使用存储。请先导出已有记录备份，并检查浏览器设置。')}
 function dateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 let todayKey=dateKey(),weekOffset=0,timer=null;
@@ -74,4 +74,24 @@ function exportData(){const a=document.createElement('a');const url=URL.createOb
 async function importData(e){const f=e.target.files[0];if(!f)return;try{if(f.size>5000000)throw Error();const v=JSON.parse(await f.text());if(!valid(v))throw Error();if(confirm('用备份替换当前全部记录？请确认已经导出当前记录。')){db=v;timer=null;save();render();$('settingsMessage').textContent='恢复完成。'}}catch(err){alert('无法恢复：请选择本工具导出的有效 JSON 备份文件。')}e.target.value=''}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();render()}});render();
 </script>
+<!-- 网站所有者配置：填入 Cloudflare Web Analytics 提供的公开 token，不要填写 API 密钥。 -->
+<script>
+(function () {
+  const CLOUDFLARE_ANALYTICS_TOKEN = '447951d12dc54cb28b3e180fe1e17c43';
+  const notice = document.getElementById('analyticsNotice');
+  if (!/^[a-f0-9]{32}$/i.test(CLOUDFLARE_ANALYTICS_TOKEN)) return;
+  if (location.protocol !== 'https:') return;
+  notice.textContent = '本站使用 Cloudflare Web Analytics 汇总页面访问与设备类型。统计请求会发送至 Cloudflare；不上传任务、感想、奖励或备份内容。设备分类为估算值。';
+  notice.hidden = false;
+  try {
+    const beacon = document.createElement('script');
+    beacon.defer = true;
+    beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    beacon.setAttribute('data-cf-beacon', JSON.stringify({token: CLOUDFLARE_ANALYTICS_TOKEN, spa: false}));
+    beacon.onerror = function () { console.info('访问统计未加载，学习工具仍可正常使用。'); };
+    document.body.appendChild(beacon);
+  } catch (_) { /* 统计故障不影响每日计划。 */ }
+})();
+</script>
 </html>
+
